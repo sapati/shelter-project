@@ -1,0 +1,6 @@
+[workspace]
+
+members = [
+  "shelter_main"
+]
+
