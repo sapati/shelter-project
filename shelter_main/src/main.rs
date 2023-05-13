@@ -1,10 +1,11 @@
 use clap::{Arg, Command};
 use dotenv::dotenv;
+use shelter_main::commands;
 
 pub fn main() -> anyhow::Result<()> {
     dotenv().ok();
 
-    let command = Command::new("Dog Shelter sample application")
+    let mut command = Command::new("Dog Shelter sample application")
         .version("1.0")
         .author("Sandor Apati <sapati@gmail.com>")
         .about("A sample application to experiment with Rust-based microservices")
@@ -16,7 +17,11 @@ pub fn main() -> anyhow::Result<()> {
                 .default_value("config.json"),
         );
 
-    let _matches = command.get_matches();
+    command = commands::configure(command);
+
+    let matches = command.get_matches();
+
+    commands::handle(&matches)?;
 
     Ok(())
 }
