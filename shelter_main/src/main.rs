@@ -1,6 +1,7 @@
 use clap::{Arg, Command};
 use dotenv::dotenv;
 use shelter_main::commands;
+use shelter_main::settings;
 
 pub fn main() -> anyhow::Result<()> {
     dotenv().ok();
@@ -21,7 +22,14 @@ pub fn main() -> anyhow::Result<()> {
 
     let matches = command.get_matches();
 
-    commands::handle(&matches)?;
+    let config_location = matches
+        .get_one::<String>("config")
+        .map(|s| s.as_str())
+        .unwrap_or("");
+
+    let settings = settings::Settings::new(config_location, "SHELTER")?;
+
+    commands::handle(&matches, &settings)?;
 
     Ok(())
 }
