@@ -18,3 +18,4 @@ tracing = { version = "0.1", features = ["log"] }
 tracing-log = { version = "0.1" }
 tracing-subscriber = { version = "0.2", features = ["registry", "env-filter"] }
 tower-http = { version = "0.3.5", features = ["trace"] }
+arc-swap = "1.6"
