@@ -2,6 +2,7 @@
 
 members = [
   "shelter_main",
-  "migration"
+  "migration",
+  "entity"
 ]
 

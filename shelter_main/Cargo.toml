@@ -20,4 +20,7 @@ tracing-subscriber = { version = "0.2", features = ["registry", "env-filter"] }
 tower-http = { version = "0.3.5", features = ["trace"] }
 arc-swap = "1.6"
 sea-orm = { version = "0.11", features = [ "sqlx-postgres", "runtime-tokio-rustls", "macros" ] }
+password-hash = "0.5"
+argon2 = "0.5"
 migration = { path = "../migration" }
+entity = { path = "../entity" }
