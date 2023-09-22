@@ -1,6 +1,7 @@
 use crate::settings::Settings;
 use crate::state::ApplicationState;
 use clap::{value_parser, Arg, ArgMatches, Command};
+use sea_orm::Database;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use std::sync::Arc;
 use tower_http::trace::TraceLayer;
@@ -33,7 +34,12 @@ fn start_tokio(port: u16, settings: &Settings) -> anyhow::Result<()> {
         .build()
         .unwrap()
         .block_on(async move {
-            let state = Arc::new(ApplicationState::new(settings)?);
+            let db_url = settings.database.url.clone().unwrap_or("".to_string());
+            let db_conn = Database::connect(db_url)
+                .await
+                .expect("Database connection failed");
+
+            let state = Arc::new(ApplicationState::new(settings, db_conn)?);
 
             let addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), port);
 
