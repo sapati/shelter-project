@@ -1,5 +1,5 @@
 use super::handlers;
-use crate::api::handlers::jwt::auth;
+use crate::api::middleware::jwt::auth;
 use crate::state::ApplicationState;
 use axum::routing::{get, post};
 use axum::{middleware, Router};

@@ -8,7 +8,7 @@ use axum::{
     Json,
 };
 
-use crate::api::response::error::ErrorResponse;
+use crate::api::response::error::{ErrorResponse, Status};
 use crate::api::response::TokenClaims;
 use crate::state::ApplicationState;
 use jsonwebtoken::{decode, DecodingKey, Validation};
@@ -30,7 +30,7 @@ pub async fn auth<B>(
 
     let token = token.ok_or_else(|| {
         let json_error = ErrorResponse {
-            status: "error".to_string(),
+            status: Status::Error,
             message: "Missing bearer token".to_string(),
         };
         (StatusCode::UNAUTHORIZED, Json(json_error))
@@ -45,7 +45,7 @@ pub async fn auth<B>(
     )
     .map_err(|_| {
         let json_error = ErrorResponse {
-            status: "error".to_string(),
+            status: Status::Error,
             message: "Invalid bearer token".to_string(),
         };
         (StatusCode::UNAUTHORIZED, Json(json_error))

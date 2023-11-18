@@ -3,6 +3,7 @@ use axum::Router;
 use std::sync::Arc;
 
 mod handlers;
+pub mod middleware;
 mod request;
 mod response;
 mod v1;
