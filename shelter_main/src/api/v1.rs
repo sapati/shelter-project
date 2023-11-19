@@ -19,6 +19,8 @@ pub fn configure(state: Arc<ApplicationState>) -> Router {
             "/dogs",
             post(handlers::dogs::create)
                 .with_state(state.clone())
-                .route_layer(middleware::from_fn_with_state(state, auth)),
+                .route_layer(middleware::from_fn_with_state(state.clone(), auth)),
         )
+        .route("/dogs", get(handlers::dogs::list).with_state(state.clone()))
+        .route("/dogs/:id", get(handlers::dogs::get).with_state(state))
 }
