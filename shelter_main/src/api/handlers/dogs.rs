@@ -9,8 +9,10 @@ use entity::dog::DogCreateRequest;
 use entity::dog::Entity as Dog;
 use sea_orm::{ActiveModelTrait, EntityTrait, IntoActiveModel, TryIntoModel};
 use std::sync::Arc;
+use tracing::instrument;
 
 #[debug_handler]
+#[instrument(level = "info", name = "create_dog", skip_all)]
 pub async fn create(
     Extension(_claims): Extension<TokenClaims>,
     State(state): State<Arc<ApplicationState>>,
@@ -28,19 +30,24 @@ pub async fn create(
     Ok(Json(response))
 }
 
+#[instrument(level = "info", name = "list_dogs", skip_all)]
 pub async fn list(
     State(state): State<Arc<ApplicationState>>,
 ) -> Result<Json<DogListResponse>, AppError> {
     let dogs = Dog::find().all(state.db_conn.load().as_ref()).await?;
+    let n = dogs.len();
 
     let response = DogListResponse {
         status: Status::Success,
         data: dogs,
     };
 
+    tracing::info!("number of dogs: {}", n);
+
     Ok(Json(response))
 }
 
+#[instrument(level = "info", name = "get_dog", skip_all)]
 pub async fn get(
     State(state): State<Arc<ApplicationState>>,
     Path(dog_id): Path<i32>,
