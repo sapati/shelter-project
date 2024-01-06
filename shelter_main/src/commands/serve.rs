@@ -17,6 +17,7 @@ use tracing::level_filters::LevelFilter;
 use tracing::Level;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
+use tracing_subscriber::fmt;
 
 pub fn configure() -> Command {
     Command::new("serve").about("Start HTTP server").arg(
@@ -101,23 +102,20 @@ fn start_tokio(port: u16, settings: &Settings) -> anyhow::Result<()> {
         .block_on(async move {
             global::set_text_map_propagator(TraceContextPropagator::new());
 
-            let otlp_endpoint = settings
-                .tracing
-                .otlp_endpoint
-                .clone()
-                .unwrap_or("http://localhost:4317".to_string());
-
-            let tracer = init_tracer(&otlp_endpoint)?;
-
-            let telemetry_layer = tracing_opentelemetry::layer().with_tracer(tracer);
             let subscriber = tracing_subscriber::registry()
-                .with(LevelFilter::from_level(Level::DEBUG))
-                .with(telemetry_layer);
+                .with(LevelFilter::from_level(Level::DEBUG));
 
-            subscriber.init();
+            let telemetry_layer = if let Some(otlp_endpoint) = settings.tracing.otlp_endpoint.clone() {
+                let tracer = init_tracer(&otlp_endpoint)?;
+                let _meter_provider = init_metrics(&otlp_endpoint);
+                let _log_provider = init_logs(&otlp_endpoint);
 
-            let _meter_provider = init_metrics(&otlp_endpoint);
-            let _log_provider = init_logs(&otlp_endpoint);
+                Some(tracing_opentelemetry::layer().with_tracer(tracer))
+            } else {
+                None
+            };
+
+            subscriber.with(telemetry_layer).with(fmt::Layer::default()).init();
 
             let db_url = settings.database.url.clone().unwrap_or("".to_string());
             let db_conn = Database::connect(db_url)
