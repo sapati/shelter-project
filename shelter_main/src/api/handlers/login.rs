@@ -16,6 +16,16 @@ use sea_orm::EntityTrait;
 use sea_orm::QueryFilter;
 use std::sync::Arc;
 
+#[utoipa::path(
+    post,
+    path = "/login",
+    tag = "login",
+    request_body = LoginRequest,
+    responses(
+        (status = 200, description = "Login success", body = LoginResponse),
+        (status = 401, description = "Unauthorized", body = ErrorResponse),
+    ),
+)]
 pub async fn login(
     State(state): State<Arc<ApplicationState>>,
     CustomJson(payload): CustomJson<LoginRequest>,

@@ -30,5 +30,7 @@ opentelemetry_sdk = { version = "0.21.1", features = ["rt-tokio", "logs"] }
 opentelemetry-otlp = { version = "0.14.0", features = ["tonic", "metrics", "logs"]  }
 opentelemetry-semantic-conventions = { version = "0.13.0" }
 opentelemetry-http = "0.10.0"
+utoipa = { version = "4.1.0", features = ["axum_extras", "chrono"] }
+utoipa-swagger-ui = { version = "4.0.0", features = ["axum"] }
 migration = { path = "../migration" }
 entity = { path = "../entity" }

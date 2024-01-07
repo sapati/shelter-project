@@ -11,6 +11,16 @@ use sea_orm::{ActiveModelTrait, EntityTrait, IntoActiveModel, TryIntoModel};
 use std::sync::Arc;
 use tracing::instrument;
 
+#[utoipa::path(
+    post,
+    path = "/dogs",
+    tag = "dogs",
+    request_body = DogCreateRequest,
+    responses(
+        (status = 200, description = "Dog create", body = DogCreateResponse),
+        (status = 401, description = "Missing bearer token", body = ErrorResponse),
+    ),
+)]
 #[debug_handler]
 #[instrument(level = "info", name = "create_dog", skip_all)]
 pub async fn create(
@@ -30,6 +40,14 @@ pub async fn create(
     Ok(Json(response))
 }
 
+#[utoipa::path(
+    get,
+    path = "/dogs",
+    tag = "dogs",
+    responses(
+       (status = 200, description = "Hello World", body = DogListResponse),
+    ),
+)]
 #[instrument(level = "info", name = "list_dogs", skip_all)]
 pub async fn list(
     State(state): State<Arc<ApplicationState>>,
@@ -47,6 +65,17 @@ pub async fn list(
     Ok(Json(response))
 }
 
+#[utoipa::path(
+    get,
+    path = "/dogs/{dogId}",
+    tag = "dogs",
+    params(
+        ("dogId" = i32, Path, description = "id of the dog"),
+    ),
+    responses(
+        (status = 200, description = "Dog", body = DogGetResponse),
+    ),
+)]
 #[instrument(level = "info", name = "get_dog", skip_all)]
 pub async fn get(
     State(state): State<Arc<ApplicationState>>,
