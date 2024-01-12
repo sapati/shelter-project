@@ -20,6 +20,9 @@ use tracing::instrument;
         (status = 200, description = "Dog create", body = DogCreateResponse),
         (status = 401, description = "Missing bearer token", body = ErrorResponse),
     ),
+    security(
+        ("api_jwt_token" = [])
+    ),
 )]
 #[debug_handler]
 #[instrument(level = "info", name = "create_dog", skip_all)]
