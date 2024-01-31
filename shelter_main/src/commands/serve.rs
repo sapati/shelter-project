@@ -19,8 +19,10 @@ use tracing_subscriber::fmt;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 
+pub const COMMAND_NAME: &str = "serve";
+
 pub fn configure() -> Command {
-    Command::new("serve").about("Start HTTP server").arg(
+    Command::new(COMMAND_NAME).about("Start HTTP server").arg(
         Arg::new("port")
             .short('p')
             .long("port")
@@ -32,11 +34,8 @@ pub fn configure() -> Command {
 }
 
 pub fn handle(matches: &ArgMatches, settings: &Settings) -> anyhow::Result<()> {
-    if let Some(matches) = matches.subcommand_matches("serve") {
-        let port: u16 = *matches.get_one("port").unwrap_or(&8080);
-
-        start_tokio(port, settings)?;
-    }
+    let port: u16 = *matches.get_one("port").unwrap_or(&8080);
+    start_tokio(port, settings)?;
 
     Ok(())
 }

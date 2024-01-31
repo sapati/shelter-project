@@ -9,8 +9,10 @@ use sea_orm::QueryFilter;
 use sea_orm::{ActiveModelTrait, Database, EntityTrait};
 use serde_json::json;
 
+pub const COMMAND_NAME: &str = "createadmin";
+
 pub fn configure() -> Command {
-    Command::new("createadmin")
+    Command::new(COMMAND_NAME)
         .about("Create the default admin user")
         .arg(
             Arg::new("password")
@@ -23,45 +25,43 @@ pub fn configure() -> Command {
 }
 
 pub fn handle(matches: &ArgMatches, settings: &Settings) -> anyhow::Result<()> {
-    if let Some(matches) = matches.subcommand_matches("createadmin") {
-        let password = matches.get_one::<String>("password").unwrap();
+    let password = matches.get_one::<String>("password").unwrap();
 
-        tokio::runtime::Builder::new_current_thread()
-            .enable_all()
-            .build()
-            .unwrap()
-            .block_on(async move {
-                let db_url = settings.database.url.clone().unwrap_or("".to_string());
-                let conn = Database::connect(db_url)
-                    .await
-                    .expect("Database connection failed");
+    tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .unwrap()
+        .block_on(async move {
+            let db_url = settings.database.url.clone().unwrap_or("".to_string());
+            let conn = Database::connect(db_url)
+                .await
+                .expect("Database connection failed");
 
-                let admins: Vec<entity::user::Model> = entity::user::Entity::find()
-                    .filter(entity::user::Column::Username.eq("admin"))
-                    .all(&conn)
-                    .await?;
+            let admins: Vec<entity::user::Model> = entity::user::Entity::find()
+                .filter(entity::user::Column::Username.eq("admin"))
+                .all(&conn)
+                .await?;
 
-                if !admins.is_empty() {
-                    println!("Admin user already exists");
-                    return Ok(());
-                }
+            if !admins.is_empty() {
+                println!("Admin user already exists");
+                return Ok(());
+            }
 
-                let encrypted_password = encrypt_password(password)?;
+            let encrypted_password = encrypt_password(password)?;
 
-                let admin_model = entity::user::ActiveModel::from_json(json!({
-                    "username": "admin",
-                    "password": encrypted_password,
-                }))?;
+            let admin_model = entity::user::ActiveModel::from_json(json!({
+                "username": "admin",
+                "password": encrypted_password,
+            }))?;
 
-                if let Ok(_admin) = admin_model.save(&conn).await {
-                    println!("Admin user created");
-                } else {
-                    println!("Failed to create admin user");
-                }
+            if let Ok(_admin) = admin_model.save(&conn).await {
+                println!("Admin user created");
+            } else {
+                println!("Failed to create admin user");
+            }
 
-                Ok::<(), anyhow::Error>(())
-            })?;
-    }
+            Ok::<(), anyhow::Error>(())
+        })?;
 
     Ok(())
 }
